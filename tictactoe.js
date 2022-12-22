@@ -121,34 +121,27 @@ export default function TicTacToe() {
   }
 
   /**
-   * Plays a move at a specific index. Check for possible outcomes:
-   *
-   * 1. Continue - game continues on, run onContinue callback
-   * 2. Retry - player has to retry, run onRetry callback
-   * 3. Win - player wins, run onWin callback with player that won as arg
-   * 4. Draw - game is a draw, run onDraw callback
+   * Plays a move at a specific index, and checks for possible outcomes
    */
-  function play(
-    index,
-    onContinue = () => {},
-    onRetry = () => {},
-    onWin = () => {},
-    onDraw = () => {}
-  ) {
+  function play(index, onPlay = () => {}, onRetry = () => {}) {
     // if the game is in an ended state, don't allow play to continue
     if ([FS.player_x_wins, FS.player_o_wins, FS.draw].includes(state)) return
 
-    // if the spot is filled, return
+    let prevState = state
+    let nextState
+
+    // if the spot is filled, exit early
     if (board[index] !== undefined) {
-      onRetry(state)
+      nextState = state
+      onRetry(prevState, nextState)
       return
     }
 
     // if it's player x turn, fill the spot with "x"
-    if (state === FS.player_x_turn) board[index] = 'x'
+    if (prevState === FS.player_x_turn) board[index] = 'x'
 
     // if it's player o turn, fill the spot with "o"
-    if (state === FS.player_o_turn) board[index] = 'o'
+    if (prevState === FS.player_o_turn) board[index] = 'o'
 
     // now let's compare board spots to winning combination spots to find a
     // possible winner
@@ -167,35 +160,38 @@ export default function TicTacToe() {
       // if all values in the filled spots are "x", update state to x wins and
       // exit function
       if (filledSpots.every((value) => value === 'x')) {
-        state = FS.player_x_wins
-        onWin(state)
+        nextState = state = FS.player_x_wins
+        onPlay(prevState, nextState)
         return
       }
 
       // if all values in the filled spots are "o", update state to o wins and
       // break out of loop
       if (filledSpots.every((value) => value === 'o')) {
-        state = FS.player_o_wins
-        onWin(state)
+        nextState = state = FS.player_o_wins
+        onPlay(prevState, nextState)
         return
       }
     }
 
     // if no winner found, check for a draw by seeing if the board is full
     if (board.filter(Boolean).length === 9) {
-      state = FS.draw
-      onDraw(state)
+      nextState = state = FS.draw
+      onPlay(prevState, nextState)
       return
     }
 
-    // if there was no resolution on the game, change player turn
-    if (state === FS.player_x_turn) {
-      state = FS.player_o_turn
-      onContinue(state)
+    // if prevState was player x turn, swap to player o turn
+    if (prevState === FS.player_x_turn) {
+      nextState = state = FS.player_o_turn
+      onPlay(prevState, nextState)
       return
-    } else {
-      state = FS.player_x_turn
-      onContinue(state)
+    }
+
+    // if prevState was player o turn, swap to player x turn
+    if (state === FS.player_o_turn) {
+      nextState = state = FS.player_x_turn
+      onPlay(prevState, nextState)
       return
     }
   }
