@@ -1,8 +1,8 @@
 {
   "name": "tic-tac-toe",
   "version": "1.0.0",
-  "description": "Game of tic tac toe using html, css, and javascript",
-  "main": "main.js",
+  "description": "Game of tic tac toe written in javascript",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "jest",
