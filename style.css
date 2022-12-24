@@ -1,10 +1,126 @@
+:root {
+  --colorPurple: #847BDB;
+  --colorTurquoise: #3BD1B8;
+  --colorGreen: #ACEB63;
+  --colorYellow: #FFF85E;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  background-color: var(--colorPurple);
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 1.6rem;
+}
+
+button {
+  all: unset;
+  margin: 0;
+  padding: 10px 20px;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: var(--colorGreen);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.wrapper {
+  display: grid;
+  grid-gap: 40px;
+  max-width: 720px;
+  margin: 40px auto;
+  justify-content: center;
+}
+
+.header {
+  text-align: center;
+}
+
+.header-title,
+.header-subtitle {
+  color: white;
+  background-color: var(--colorTurquoise);
+}
+
+.header-title {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 10px 20px;
+}
+
+.header-subtitle {
+  margin: 0;
+  padding: 10px 20px;
+}
+
+.main {
+  display: grid;
+  justify-content: center;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(3, 90px);
   grid-template-rows: repeat(3, 90px);
-  grid-gap: 2px;
+  grid-gap: 12px;
 }
 
-.cell {
-  background-color: #ccc;
+.board-spot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: var(--colorYellow);
+  border-radius: 4px;
+  transition: transform 0.2s;
+  user-select: none;
+}
+
+.board-spot:not(.filled) {
+  cursor: pointer;
+}
+
+.board-spot:not(.filled):hover {
+  transform: scale(1.1);
+}
+
+.info {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.info-message {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.info-message .turn {
+  font-weight: 700;
+}
+
+.actions {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.footer {
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: center;
 }
