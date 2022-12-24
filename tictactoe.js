@@ -35,7 +35,7 @@
  * Finite states
  * A collection of states in which the game can be in
  */
-const FS = {
+export const FS = {
   player_x_turn: 'player_x_turn',
   player_o_turn: 'player_o_turn',
   player_x_wins: 'player_x_wins',
@@ -46,7 +46,7 @@ const FS = {
 /**
  * Possible winning combinations on a 9 spot board
  */
-const WINNING_COMBINATIONS = [
+export const WINNING_COMBINATIONS = [
   [0, 1, 2],
   [3, 4, 5],
   [6, 7, 8],
@@ -86,7 +86,7 @@ export default function TicTacToe() {
   /**
    * Resets the state and board to an initial state
    */
-  function resetBoard() {
+  function reset() {
     state = FS.player_x_turn
     board = new Array(9).fill(undefined)
   }
@@ -199,7 +199,7 @@ export default function TicTacToe() {
   return {
     getState,
     getBoard,
-    resetBoard,
+    reset,
     drawBoard,
     play,
   }
