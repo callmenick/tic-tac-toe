@@ -2,10 +2,10 @@ import TicTacToe from './tictactoe'
 
 describe('tictactoe', () => {
   describe('base configuration', () => {
-    test('default state is player_x_turn', () => {
-      const game = TicTacToe()
-      const state = game.getState()
-      expect(state).toEqual('player_x_turn')
+    test('default state is idle', () => {
+      const tictactoe = TicTacToe()
+      const state = tictactoe.getState()
+      expect(state).toEqual('idle')
     })
 
     test('board size is 9', () => {
@@ -22,15 +22,19 @@ describe('tictactoe', () => {
   })
 
   describe('game play', () => {
-    test('expect that player x can play anywhere on first turn and fill the spot', () => {
+    test('expect game to transition to player x turn after starting', () => {
       const tictactoe = TicTacToe()
-      tictactoe.play(1)
-      const board = tictactoe.getBoard()
-      expect(board[1]).toEqual('x')
+      let state = tictactoe.getState()
+      expect(state).toEqual('idle')
+
+      tictactoe.start()
+      state = tictactoe.getState()
+      expect(state).toEqual('player_x_turn')
     })
 
     test('expect players to take turns if game is in continuous play state', () => {
       const tictactoe = TicTacToe()
+      tictactoe.start()
 
       // x plays in spot 0
       tictactoe.play(0)
@@ -77,6 +81,7 @@ describe('tictactoe', () => {
       for (let i = 0; i < xWinningSequences.length; i++) {
         const tictactoe = TicTacToe()
         const xWinningSequence = xWinningSequences[i]
+        tictactoe.start()
 
         test(`expect x to win for play sequence ${xWinningSequence.toString()}`, () => {
           for (let j = 0; j < xWinningSequence.length; j++) {
@@ -104,6 +109,7 @@ describe('tictactoe', () => {
       for (let i = 0; i < oWinningSequences.length; i++) {
         const tictactoe = TicTacToe()
         const oWinningSequence = oWinningSequences[i]
+        tictactoe.start()
 
         test(`expect o to win for play sequence ${oWinningSequence.toString()}`, () => {
           for (let j = 0; j < oWinningSequence.length; j++) {
@@ -118,6 +124,7 @@ describe('tictactoe', () => {
 
     test('expect draw if play sequence results in full board with no winner', () => {
       const tictactoe = TicTacToe()
+      tictactoe.start()
 
       tictactoe.play(0)
       tictactoe.play(4)
@@ -133,8 +140,43 @@ describe('tictactoe', () => {
       expect(state).toEqual('draw')
     })
 
+    test('expect state and board to reset on reset', () => {
+      const tictactoe = TicTacToe()
+
+      let state = tictactoe.getState()
+      let board = tictactoe.getBoard()
+      expect(state).toEqual('idle')
+      expect(board.filter(Boolean).length).toEqual(0)
+
+      tictactoe.start()
+      state = tictactoe.getState()
+      board = tictactoe.getBoard()
+      expect(state).toEqual('player_x_turn')
+      expect(board.filter(Boolean).length).toEqual(0)
+
+      tictactoe.play(0)
+      state = tictactoe.getState()
+      board = tictactoe.getBoard()
+      expect(state).toEqual('player_o_turn')
+      expect(board.filter(Boolean).length).toEqual(1)
+
+      tictactoe.play(1)
+      state = tictactoe.getState()
+      board = tictactoe.getBoard()
+      expect(state).toEqual('player_x_turn')
+      expect(board.filter(Boolean).length).toEqual(2)
+
+      tictactoe.reset()
+      state = tictactoe.getState()
+      board = tictactoe.getBoard()
+      expect(state).toEqual('idle')
+      expect(board.filter(Boolean).length).toEqual(0)
+    })
+
     test('execute onPlay callback if game can continue', () => {
       const tictactoe = TicTacToe()
+      tictactoe.start()
+
       const onPlay = jest.fn((prevState, nextState) => [prevState, nextState])
 
       tictactoe.play(0, onPlay)
@@ -150,6 +192,8 @@ describe('tictactoe', () => {
 
     test('execute onRetry callback if player has to retry', () => {
       const tictactoe = TicTacToe()
+      tictactoe.start()
+
       const onRetry = jest.fn((prevState, nextState) => [prevState, nextState])
 
       tictactoe.play(0)
@@ -166,6 +210,7 @@ describe('tictactoe', () => {
 
       // test against x win sequence
       const tictactoeXWinner = TicTacToe()
+      tictactoeXWinner.start()
       tictactoeXWinner.play(0, onPlay, onRetry)
       tictactoeXWinner.play(3, onPlay, onRetry)
       tictactoeXWinner.play(1, onPlay, onRetry)
@@ -182,6 +227,7 @@ describe('tictactoe', () => {
 
       // test against o win sequence
       const tictactoeOWinner = TicTacToe()
+      tictactoeOWinner.start()
       tictactoeOWinner.play(3, onPlay, onRetry)
       tictactoeOWinner.play(0, onPlay, onRetry)
       tictactoeOWinner.play(7, onPlay, onRetry)
@@ -199,6 +245,7 @@ describe('tictactoe', () => {
       const onRetry = jest.fn((prevState, nextState) => [prevState, nextState])
       const tictactoe = TicTacToe()
 
+      tictactoe.start()
       tictactoe.play(0, onPlay, onRetry)
       tictactoe.play(4, onPlay, onRetry)
       tictactoe.play(1, onPlay, onRetry)

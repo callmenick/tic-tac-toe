@@ -38,12 +38,17 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .wrapper {
   display: grid;
   grid-gap: 40px;
   max-width: 720px;
   margin: 40px auto;
-  justify-content: center;
+  justify-items: center;
 }
 
 .header {
@@ -69,7 +74,7 @@ button {
 
 .main {
   display: grid;
-  justify-content: center;
+  justify-items: center;
 }
 
 .board {
@@ -98,6 +103,12 @@ button {
 
 .board-spot:not(.filled):hover {
   transform: scale(1.1);
+}
+
+.board-inactive .board-spot {
+  transform: scale(0.3);
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .info {

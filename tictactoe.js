@@ -36,6 +36,7 @@
  * A collection of states in which the game can be in
  */
 export const FS = {
+  idle: 'idle',
   player_x_turn: 'player_x_turn',
   player_o_turn: 'player_o_turn',
   player_x_wins: 'player_x_wins',
@@ -59,9 +60,9 @@ export const WINNING_COMBINATIONS = [
 
 export default function TicTacToe() {
   /**
-   * Game state, defaults to player_x_turn as player "x" always begins
+   * Game state, defaults to idle
    */
-  let state = FS.player_x_turn
+  let state = FS.idle
 
   /**
    * Starting epresentation of the board, an array length 9 filled with
@@ -84,10 +85,25 @@ export default function TicTacToe() {
   }
 
   /**
+   * Starts a new game by sets state to player "x" turn
+   */
+  function start() {
+    state = FS.player_x_turn
+  }
+
+  /**
+   * Restarts a game by emptying board and setting to player x turn
+   */
+  function restart() {
+    state = FS.player_x_turn
+    board = new Array(9).fill(undefined)
+  }
+
+  /**
    * Resets the state and board to an initial state
    */
   function reset() {
-    state = FS.player_x_turn
+    state = FS.idle
     board = new Array(9).fill(undefined)
   }
 
@@ -124,8 +140,11 @@ export default function TicTacToe() {
    * Plays a move at a specific index, and checks for possible outcomes
    */
   function play(index, onPlay = () => {}, onRetry = () => {}) {
-    // if the game is in an ended state, don't allow play to continue
-    if ([FS.player_x_wins, FS.player_o_wins, FS.draw].includes(state)) return
+    // if game is in state where play should not continue, exit early
+    if (state === FS.idle) return
+    if (state === FS.player_x_wins) return
+    if (state === FS.player_o_wins) return
+    if (state === FS.draw) return
 
     let prevState = state
     let nextState
@@ -199,8 +218,10 @@ export default function TicTacToe() {
   return {
     getState,
     getBoard,
+    start,
+    restart,
     reset,
-    drawBoard,
     play,
+    drawBoard,
   }
 }
