@@ -15,213 +15,190 @@
  *    |   |
  *
  * For the purpose of the game logic, we'll assign an index to each square going
- * left to right, top to bottom:
  *
- *  0 | 1 | 2
- * ---|---|---
- *  3 | 4 | 5
- * ---|---|---
- *  6 | 7 | 8
+ * In code, we will represent our board as a 2-d array:
  *
- * In code, we will represent our board as a 1-d array:
- *
- * [0, 1, 2, 3, 4, 5, 6, 7, 8]
+ *  00 | 01 | 02
+ * ----|----|----
+ *  10 | 11 | 12
+ * ----|----|----
+ *  20 | 21 | 22
  *
  * We will use this to assign spots when a player playes, and to determine the
  * outcome of the game with each passing move.
  */
 
 /**
- * Finite states
- * A collection of states in which the game can be in
+ * Starting epresentation of the board, 2d array with 3 entrys
  */
-export const FS = {
-  idle: 'idle',
-  player_x_turn: 'player_x_turn',
-  player_o_turn: 'player_o_turn',
-  player_x_wins: 'player_x_wins',
-  player_o_wins: 'player_o_wins',
-  draw: 'draw',
+let board = [
+  new Array(3).fill(undefined),
+  new Array(3).fill(undefined),
+  new Array(3).fill(undefined),
+]
+
+/**
+ * Game state. Can be one of:
+ *   idle – game is idle, hasn't started yet
+ *   playing - game is in a playing state
+ *   win - someone won the game
+ *   draw - game is a draw
+ */
+let state = 'idle'
+
+/**
+ * Keep track of the current player, either "x" or "o"
+ */
+let currentPlayer = 'x'
+
+/**
+ * Gets the outcome of the board. First checks if there's any win states by
+ * checking rows, cols, and diagonals. Then check if there's a draw.
+ */
+function getOutcome() {
+  // check rows
+  for (let i = 0; i < 3; i++) {
+    if (
+      board[i][0] === currentPlayer &&
+      board[i][1] === currentPlayer &&
+      board[i][2] === currentPlayer
+    ) {
+      return 'win'
+    }
+  }
+
+  // check columns
+  for (let j = 0; j < 3; j++) {
+    if (
+      board[0][j] === currentPlayer &&
+      board[1][j] === currentPlayer &&
+      board[2][j] === currentPlayer
+    ) {
+      return 'win'
+    }
+  }
+
+  // check first diagonal
+  if (
+    board[0][0] === currentPlayer &&
+    board[1][1] === currentPlayer &&
+    board[2][2] === currentPlayer
+  ) {
+    return 'win'
+  }
+
+  // check second diagonal
+  if (
+    board[0][2] === currentPlayer &&
+    board[1][1] === currentPlayer &&
+    board[2][0] === currentPlayer
+  ) {
+    return 'win'
+  }
+
+  // check if the board is full
+  // flatten it, then filter out empty entries, then check the length
+  if (board.flat().filter(Boolean).length === 9) {
+    return 'draw'
+  }
+
+  return 'playing'
 }
 
 /**
- * Possible winning combinations on a 9 spot board
+ * Starts the game by transitioning to "playing" state
  */
-export const WINNING_COMBINATIONS = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-]
+export function start() {
+  state = 'playing'
+}
 
-export default function TicTacToe() {
-  /**
-   * Game state, defaults to idle
-   */
-  let state = FS.idle
+/**
+ * Executes a play at coordinates x,y, where x is the row indeex, and y is the
+ * column index
+ */
+export function play(x, y) {
+  // don't allow playing if not in a playing state
+  if (state !== 'playing') return
 
-  /**
-   * Starting epresentation of the board, an array length 9 filled with
-   * undefined as all entries
-   */
-  let board = new Array(9).fill(undefined)
+  // don't allow playing if the spot is filled
+  if (board[x][y] !== undefined) return
 
-  /**
-   * Getter for game state
-   */
-  function getState() {
-    return state
+  // reject out of bounds coordinates
+  if (x < 0 || x > 2) return
+  if (y < 0 || y > 2) return
+
+  // fill the spot with the current player
+  board[x][y] = currentPlayer
+
+  // update state by getting outcome after the play
+  state = getOutcome()
+
+  // if game is still "playing", then swap the turn
+  if (state === 'playing') {
+    currentPlayer = currentPlayer === 'x' ? 'o' : 'x'
   }
+}
 
-  /**
-   * Getter for game board
-   */
-  function getBoard() {
-    return board
-  }
+/**
+ * Resets the game of tic tac toe by emptying the board, changing state back to
+ * idle, and resetting current player to x
+ */
+export function reset() {
+  board = [
+    new Array(3).fill(undefined),
+    new Array(3).fill(undefined),
+    new Array(3).fill(undefined),
+  ]
+  state = 'idle'
+  currentPlayer = 'x'
+}
 
-  /**
-   * Starts a new game by sets state to player "x" turn
-   */
-  function start() {
-    state = FS.player_x_turn
-  }
+/**
+ * Getter for getting the board
+ */
+export function getBoard() {
+  return board
+}
 
-  /**
-   * Restarts a game by emptying board and setting to player x turn
-   */
-  function restart() {
-    state = FS.player_x_turn
-    board = new Array(9).fill(undefined)
-  }
+/**
+ * Getter for getting the state
+ */
+export function getState() {
+  return state
+}
 
-  /**
-   * Resets the state and board to an initial state
-   */
-  function reset() {
-    state = FS.idle
-    board = new Array(9).fill(undefined)
-  }
+/**
+ * Getter for getting the current player
+ */
+export function getCurrentPlayer() {
+  return currentPlayer
+}
 
-  /**
-   * A helper function to draw a visual reference of the board, e.g.:
-   *
-   *  x |   | x
-   * ---|---|---
-   *    | o | x
-   * ---|---|---
-   *    |   | o
-   */
-  function drawBoard() {
-    const spot0 = ` ${board[0] ? board[0] : ' '} `
-    const spot1 = ` ${board[1] ? board[1] : ' '} `
-    const spot2 = ` ${board[2] ? board[2] : ' '} `
-    const spot3 = ` ${board[3] ? board[3] : ' '} `
-    const spot4 = ` ${board[4] ? board[4] : ' '} `
-    const spot5 = ` ${board[5] ? board[5] : ' '} `
-    const spot6 = ` ${board[6] ? board[6] : ' '} `
-    const spot7 = ` ${board[7] ? board[7] : ' '} `
-    const spot8 = ` ${board[8] ? board[8] : ' '} `
+/**
+ * A helper function to draw a visual reference of the board, e.g.:
+ *
+ *  x |   | x
+ * ---|---|---
+ *    | o | x
+ * ---|---|---
+ *    |   | o
+ */
+export function drawBoard() {
+  const s00 = ` ${board[0][0] ? board[0][0] : ' '} `
+  const s01 = ` ${board[0][1] ? board[0][1] : ' '} `
+  const s02 = ` ${board[0][2] ? board[0][2] : ' '} `
+  const s10 = ` ${board[1][0] ? board[1][0] : ' '} `
+  const s11 = ` ${board[1][1] ? board[1][1] : ' '} `
+  const s12 = ` ${board[1][2] ? board[1][2] : ' '} `
+  const s20 = ` ${board[2][0] ? board[2][0] : ' '} `
+  const s21 = ` ${board[2][1] ? board[2][1] : ' '} `
+  const s22 = ` ${board[2][2] ? board[2][2] : ' '} `
 
-    return [
-      `${spot0}|${spot1}|${spot2}`,
-      '---|---|---',
-      `${spot3}|${spot4}|${spot5}`,
-      '---|---|---',
-      `${spot6}|${spot7}|${spot8}`,
-    ].join('\n')
-  }
-
-  /**
-   * Plays a move at a specific index, and checks for possible outcomes
-   */
-  function play(index, onPlay = () => {}, onRetry = () => {}) {
-    // if game is in state where play should not continue, exit early
-    if (state === FS.idle) return
-    if (state === FS.player_x_wins) return
-    if (state === FS.player_o_wins) return
-    if (state === FS.draw) return
-
-    let prevState = state
-    let nextState
-
-    // if the spot is filled, exit early
-    if (board[index] !== undefined) {
-      nextState = state
-      onRetry(prevState, nextState)
-      return
-    }
-
-    // if it's player x turn, fill the spot with "x"
-    if (prevState === FS.player_x_turn) board[index] = 'x'
-
-    // if it's player o turn, fill the spot with "o"
-    if (prevState === FS.player_o_turn) board[index] = 'o'
-
-    // now let's compare board spots to winning combination spots to find a
-    // possible winner
-    for (let i = 0; i < WINNING_COMBINATIONS.length; i++) {
-      const winningCombination = WINNING_COMBINATIONS[i]
-      const filledSpots = [
-        board[winningCombination[0]],
-        board[winningCombination[1]],
-        board[winningCombination[2]],
-      ].filter(Boolean)
-
-      // if there's less than 3 filled spots for the winning combo, continue to
-      // next iteration of the loop
-      if (filledSpots.length < 3) continue
-
-      // if all values in the filled spots are "x", update state to x wins and
-      // exit function
-      if (filledSpots.every((value) => value === 'x')) {
-        nextState = state = FS.player_x_wins
-        onPlay(prevState, nextState)
-        return
-      }
-
-      // if all values in the filled spots are "o", update state to o wins and
-      // break out of loop
-      if (filledSpots.every((value) => value === 'o')) {
-        nextState = state = FS.player_o_wins
-        onPlay(prevState, nextState)
-        return
-      }
-    }
-
-    // if no winner found, check for a draw by seeing if the board is full
-    if (board.filter(Boolean).length === 9) {
-      nextState = state = FS.draw
-      onPlay(prevState, nextState)
-      return
-    }
-
-    // if prevState was player x turn, swap to player o turn
-    if (prevState === FS.player_x_turn) {
-      nextState = state = FS.player_o_turn
-      onPlay(prevState, nextState)
-      return
-    }
-
-    // if prevState was player o turn, swap to player x turn
-    if (state === FS.player_o_turn) {
-      nextState = state = FS.player_x_turn
-      onPlay(prevState, nextState)
-      return
-    }
-  }
-
-  return {
-    getState,
-    getBoard,
-    start,
-    restart,
-    reset,
-    play,
-    drawBoard,
-  }
+  return [
+    `${s00}|${s01}|${s02}`,
+    '---|---|---',
+    `${s10}|${s11}|${s12}`,
+    '---|---|---',
+    `${s20}|${s21}|${s22}`,
+  ].join('\n')
 }

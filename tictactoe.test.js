@@ -1,265 +1,297 @@
-import TicTacToe from './tictactoe'
+import {
+  play,
+  start,
+  reset,
+  getBoard,
+  getState,
+  getCurrentPlayer,
+} from './tictactoe'
+
+beforeEach(() => {
+  reset()
+})
 
 describe('tictactoe', () => {
-  describe('base configuration', () => {
+  describe('idle state', () => {
     test('default state is idle', () => {
-      const tictactoe = TicTacToe()
-      const state = tictactoe.getState()
+      const state = getState()
       expect(state).toEqual('idle')
     })
 
-    test('board size is 9', () => {
-      const tictactoe = TicTacToe()
-      const board = tictactoe.getBoard()
-      expect(board.length).toEqual(9)
-    })
-
     test('board is empty', () => {
-      const tictactoe = TicTacToe()
-      const board = tictactoe.getBoard()
-      expect(board.filter(Boolean).length).toEqual(0)
+      const board = getBoard()
+      expect(board.flat().filter(Boolean).length).toEqual(0)
     })
   })
 
   describe('game play', () => {
-    test('expect game to transition to player x turn after starting', () => {
-      const tictactoe = TicTacToe()
-      let state = tictactoe.getState()
+    test('expect game to transition to playing on start, and current player to be x', () => {
+      let state = getState()
+      let currentPlayer = getCurrentPlayer()
       expect(state).toEqual('idle')
-
-      tictactoe.start()
-      state = tictactoe.getState()
-      expect(state).toEqual('player_x_turn')
+      start()
+      state = getState()
+      expect(state).toEqual('playing')
+      expect(currentPlayer).toEqual('x')
     })
 
     test('expect players to take turns if game is in continuous play state', () => {
-      const tictactoe = TicTacToe()
-      tictactoe.start()
+      let state = getState()
+      let currentPlayer = getCurrentPlayer()
+      expect(state).toEqual('idle')
+      expect(currentPlayer).toEqual('x')
 
-      // x plays in spot 0
-      tictactoe.play(0)
-      let state = tictactoe.getState()
-      expect(state).toEqual('player_o_turn')
+      start()
 
-      // o plays in spot 1
-      tictactoe.play(1)
-      state = tictactoe.getState()
-      expect(state).toEqual('player_x_turn')
+      state = getState()
+      expect(state).toEqual('playing')
+
+      play(0, 0)
+      state = getState()
+      currentPlayer = getCurrentPlayer()
+      expect(state).toEqual('playing')
+      expect(currentPlayer).toEqual('o')
+
+      play(0, 1)
+      state = getState()
+      currentPlayer = getCurrentPlayer()
+      expect(state).toEqual('playing')
+      expect(currentPlayer).toEqual('x')
 
       // x plays in spot 2
-      tictactoe.play(2)
-      state = tictactoe.getState()
-      expect(state).toEqual('player_o_turn')
+      play(0, 2)
+      state = getState()
+      currentPlayer = getCurrentPlayer()
+      expect(state).toEqual('playing')
+      expect(currentPlayer).toEqual('o')
 
       // attempt to play in an already filled spot
-      tictactoe.play(2)
-      state = tictactoe.getState()
-      expect(state).toEqual('player_o_turn')
+      play(0, 2)
+      state = getState()
+      currentPlayer = getCurrentPlayer()
+      expect(state).toEqual('playing')
+      expect(currentPlayer).toEqual('o')
 
       // check that the board is filled with correct number of spots and correct
       // values for each spot
-      const board = tictactoe.getBoard()
-      expect(board.filter(Boolean).length).toEqual(3)
-      expect(board[0]).toEqual('x')
-      expect(board[1]).toEqual('o')
-      expect(board[2]).toEqual('x')
+      let board = getBoard()
+      expect(board[0][0]).toEqual('x')
+      expect(board[0][1]).toEqual('o')
+      expect(board[0][2]).toEqual('x')
     })
 
     describe('x win sequences', () => {
-      // define play sequences for which x wins
-      const xWinningSequences = [
-        [0, 3, 1, 4, 2],
-        [3, 0, 4, 1, 5],
-        [6, 0, 7, 1, 8],
-        [0, 1, 3, 2, 6],
-        [1, 0, 4, 3, 7],
-        [2, 0, 5, 3, 8],
-        [0, 1, 4, 2, 8],
-        [2, 1, 4, 8, 6],
+      // Define play sequences for which x wins. Each of the sub arrays
+      // represent the x,y (row,col) coordinates for the alternating turns of x
+      // and o. By playing these turns in order, we can expect x to win.
+      const winningSequences = [
+        [
+          [0, 0],
+          [0, 2],
+          [1, 0],
+          [1, 2],
+          [2, 0],
+        ],
+        [
+          [1, 0],
+          [0, 0],
+          [1, 1],
+          [0, 1],
+          [1, 2],
+        ],
+        [
+          [2, 0],
+          [0, 0],
+          [2, 1],
+          [0, 1],
+          [2, 2],
+        ],
+        [
+          [0, 0],
+          [0, 1],
+          [1, 0],
+          [1, 1],
+          [2, 0],
+        ],
+        [
+          [0, 1],
+          [0, 0],
+          [1, 1],
+          [1, 0],
+          [2, 1],
+        ],
+        [
+          [0, 2],
+          [0, 0],
+          [1, 2],
+          [1, 0],
+          [2, 2],
+        ],
+        [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [0, 2],
+          [2, 2],
+        ],
+        [
+          [0, 2],
+          [0, 0],
+          [1, 1],
+          [1, 0],
+          [2, 0],
+        ],
       ]
 
-      for (let i = 0; i < xWinningSequences.length; i++) {
-        const tictactoe = TicTacToe()
-        const xWinningSequence = xWinningSequences[i]
-        tictactoe.start()
-
-        test(`expect x to win for play sequence ${xWinningSequence.toString()}`, () => {
-          for (let j = 0; j < xWinningSequence.length; j++) {
-            let spot = xWinningSequence[j]
-            tictactoe.play(spot)
+      for (let i = 0; i < winningSequences.length; i++) {
+        let winningSequence = winningSequences[i]
+        let winningSequenceString = winningSequence.map(
+          (s) => `[${s.join('')}]`
+        )
+        test(`expect x to win for play sequence ${winningSequenceString}`, () => {
+          start()
+          for (let j = 0; j < winningSequence.length; j++) {
+            let spot = winningSequence[j]
+            play(...spot)
           }
-          const state = tictactoe.getState()
-          expect(state).toEqual('player_x_wins')
+          let state = getState()
+          let currentPlayer = getCurrentPlayer()
+          expect(state).toEqual('win')
+          expect(currentPlayer).toEqual('x')
         })
       }
     })
 
     describe('o win sequences', () => {
-      const oWinningSequences = [
-        [3, 0, 7, 1, 8, 2],
-        [0, 3, 7, 4, 8, 5],
-        [0, 6, 3, 7, 4, 8],
-        [1, 0, 2, 3, 8, 6],
-        [0, 1, 3, 4, 8, 7],
-        [0, 2, 1, 5, 3, 8],
-        [1, 0, 2, 4, 3, 8],
-        [0, 2, 1, 4, 3, 6],
+      // Define play sequences for which x wins. Each of the sub arrays
+      // represent the x,y (row,col) coordinates for the alternating turns of x
+      // and o. By playing these turns in order, we can expect x to win.
+      const winningSequences = [
+        [
+          [2, 1],
+          [0, 0],
+          [0, 2],
+          [1, 0],
+          [1, 2],
+          [2, 0],
+        ],
+        [
+          [2, 2],
+          [1, 0],
+          [0, 0],
+          [1, 1],
+          [0, 1],
+          [1, 2],
+        ],
+        [
+          [1, 0],
+          [2, 0],
+          [0, 0],
+          [2, 1],
+          [0, 1],
+          [2, 2],
+        ],
+        [
+          [2, 2],
+          [0, 0],
+          [0, 1],
+          [1, 0],
+          [1, 1],
+          [2, 0],
+        ],
+        [
+          [2, 2],
+          [0, 1],
+          [0, 0],
+          [1, 1],
+          [1, 0],
+          [2, 1],
+        ],
+        [
+          [1, 1],
+          [0, 2],
+          [0, 0],
+          [1, 2],
+          [1, 0],
+          [2, 2],
+        ],
+        [
+          [1, 0],
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [0, 2],
+          [2, 2],
+        ],
+        [
+          [0, 1],
+          [0, 2],
+          [0, 0],
+          [1, 1],
+          [1, 0],
+          [2, 0],
+        ],
       ]
 
-      for (let i = 0; i < oWinningSequences.length; i++) {
-        const tictactoe = TicTacToe()
-        const oWinningSequence = oWinningSequences[i]
-        tictactoe.start()
-
-        test(`expect o to win for play sequence ${oWinningSequence.toString()}`, () => {
-          for (let j = 0; j < oWinningSequence.length; j++) {
-            let spot = oWinningSequence[j]
-            tictactoe.play(spot)
+      for (let i = 0; i < winningSequences.length; i++) {
+        let winningSequence = winningSequences[i]
+        let winningSequenceString = winningSequence.map(
+          (s) => `[${s.join('')}]`
+        )
+        test(`expect o to win for play sequence ${winningSequenceString}`, () => {
+          start()
+          for (let j = 0; j < winningSequence.length; j++) {
+            let spot = winningSequence[j]
+            play(...spot)
           }
-          const state = tictactoe.getState()
-          expect(state).toEqual('player_o_wins')
+          let state = getState()
+          let currentPlayer = getCurrentPlayer()
+          expect(state).toEqual('win')
+          expect(currentPlayer).toEqual('o')
         })
       }
     })
 
     test('expect draw if play sequence results in full board with no winner', () => {
-      const tictactoe = TicTacToe()
-      tictactoe.start()
-
-      tictactoe.play(0)
-      tictactoe.play(4)
-      tictactoe.play(1)
-      tictactoe.play(2)
-      tictactoe.play(6)
-      tictactoe.play(3)
-      tictactoe.play(5)
-      tictactoe.play(7)
-      tictactoe.play(8)
-
-      const state = tictactoe.getState()
+      start()
+      play(0, 0)
+      play(0, 1)
+      play(0, 2)
+      play(2, 2)
+      play(1, 2)
+      play(1, 1)
+      play(2, 1)
+      play(2, 0)
+      play(1, 0)
+      const state = getState()
       expect(state).toEqual('draw')
     })
 
     test('expect state and board to reset on reset', () => {
-      const tictactoe = TicTacToe()
-
-      let state = tictactoe.getState()
-      let board = tictactoe.getBoard()
+      let state = getState()
+      let board = getBoard()
       expect(state).toEqual('idle')
-      expect(board.filter(Boolean).length).toEqual(0)
-
-      tictactoe.start()
-      state = tictactoe.getState()
-      board = tictactoe.getBoard()
-      expect(state).toEqual('player_x_turn')
-      expect(board.filter(Boolean).length).toEqual(0)
-
-      tictactoe.play(0)
-      state = tictactoe.getState()
-      board = tictactoe.getBoard()
-      expect(state).toEqual('player_o_turn')
-      expect(board.filter(Boolean).length).toEqual(1)
-
-      tictactoe.play(1)
-      state = tictactoe.getState()
-      board = tictactoe.getBoard()
-      expect(state).toEqual('player_x_turn')
-      expect(board.filter(Boolean).length).toEqual(2)
-
-      tictactoe.reset()
-      state = tictactoe.getState()
-      board = tictactoe.getBoard()
+      expect(board.flat().filter(Boolean).length).toEqual(0)
+      start()
+      state = getState()
+      board = getBoard()
+      expect(state).toEqual('playing')
+      expect(board.flat().filter(Boolean).length).toEqual(0)
+      play(0, 0)
+      state = getState()
+      board = getBoard()
+      expect(state).toEqual('playing')
+      expect(board.flat().filter(Boolean).length).toEqual(1)
+      play(1, 0)
+      state = getState()
+      board = getBoard()
+      expect(state).toEqual('playing')
+      expect(board.flat().filter(Boolean).length).toEqual(2)
+      reset()
+      state = getState()
+      board = getBoard()
       expect(state).toEqual('idle')
-      expect(board.filter(Boolean).length).toEqual(0)
-    })
-
-    test('execute onPlay callback if game can continue', () => {
-      const tictactoe = TicTacToe()
-      tictactoe.start()
-
-      const onPlay = jest.fn((prevState, nextState) => [prevState, nextState])
-
-      tictactoe.play(0, onPlay)
-      expect(onPlay.mock.calls.length).toBe(1)
-      expect(onPlay.mock.calls[0][0]).toBe('player_x_turn')
-      expect(onPlay.mock.calls[0][1]).toBe('player_o_turn')
-
-      tictactoe.play(1, onPlay)
-      expect(onPlay.mock.calls.length).toBe(2)
-      expect(onPlay.mock.calls[1][0]).toBe('player_o_turn')
-      expect(onPlay.mock.calls[1][1]).toBe('player_x_turn')
-    })
-
-    test('execute onRetry callback if player has to retry', () => {
-      const tictactoe = TicTacToe()
-      tictactoe.start()
-
-      const onRetry = jest.fn((prevState, nextState) => [prevState, nextState])
-
-      tictactoe.play(0)
-      tictactoe.play(0, undefined, onRetry)
-      expect(onRetry.mock.calls.length).toBe(1)
-      expect(onRetry.mock.calls[0][0]).toBe('player_o_turn')
-      expect(onRetry.mock.calls[0][1]).toBe('player_o_turn')
-    })
-
-    test('expect winner to be returned as next state from callback', () => {
-      // define mocks for all callbacks
-      const onPlay = jest.fn((prevState, nextState) => [prevState, nextState])
-      const onRetry = jest.fn((prevState, nextState) => [prevState, nextState])
-
-      // test against x win sequence
-      const tictactoeXWinner = TicTacToe()
-      tictactoeXWinner.start()
-      tictactoeXWinner.play(0, onPlay, onRetry)
-      tictactoeXWinner.play(3, onPlay, onRetry)
-      tictactoeXWinner.play(1, onPlay, onRetry)
-      tictactoeXWinner.play(4, onPlay, onRetry)
-      tictactoeXWinner.play(2, onPlay, onRetry)
-      expect(onRetry.mock.calls.length).toBe(0)
-      expect(onPlay.mock.calls.length).toBe(5)
-      expect(onPlay.mock.calls[4][0]).toBe('player_x_turn')
-      expect(onPlay.mock.calls[4][1]).toBe('player_x_wins')
-
-      // clear these mocks to reuse them below
-      onPlay.mockClear()
-      onRetry.mockClear()
-
-      // test against o win sequence
-      const tictactoeOWinner = TicTacToe()
-      tictactoeOWinner.start()
-      tictactoeOWinner.play(3, onPlay, onRetry)
-      tictactoeOWinner.play(0, onPlay, onRetry)
-      tictactoeOWinner.play(7, onPlay, onRetry)
-      tictactoeOWinner.play(1, onPlay, onRetry)
-      tictactoeOWinner.play(8, onPlay, onRetry)
-      tictactoeOWinner.play(2, onPlay, onRetry)
-      expect(onRetry.mock.calls.length).toBe(0)
-      expect(onPlay.mock.calls.length).toBe(6)
-      expect(onPlay.mock.calls[5][0]).toBe('player_o_turn')
-      expect(onPlay.mock.calls[5][1]).toBe('player_o_wins')
-    })
-
-    test('execute onDraw callback if game is a draw', () => {
-      const onPlay = jest.fn((prevState, nextState) => [prevState, nextState])
-      const onRetry = jest.fn((prevState, nextState) => [prevState, nextState])
-      const tictactoe = TicTacToe()
-
-      tictactoe.start()
-      tictactoe.play(0, onPlay, onRetry)
-      tictactoe.play(4, onPlay, onRetry)
-      tictactoe.play(1, onPlay, onRetry)
-      tictactoe.play(2, onPlay, onRetry)
-      tictactoe.play(6, onPlay, onRetry)
-      tictactoe.play(3, onPlay, onRetry)
-      tictactoe.play(5, onPlay, onRetry)
-      tictactoe.play(7, onPlay, onRetry)
-      tictactoe.play(8, onPlay, onRetry)
-
-      expect(onRetry.mock.calls.length).toBe(0)
-      expect(onPlay.mock.calls.length).toBe(9)
-      expect(onPlay.mock.calls[8][0]).toBe('player_x_turn')
-      expect(onPlay.mock.calls[8][1]).toBe('draw')
+      expect(board.flat().filter(Boolean).length).toEqual(0)
     })
   })
 })
