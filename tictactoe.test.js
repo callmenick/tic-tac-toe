@@ -66,7 +66,9 @@ describe('tictactoe', () => {
       expect(currentPlayer).toEqual('o')
 
       // attempt to play in an already filled spot
-      play(0, 2)
+      try {
+        play(0, 2)
+      } catch {} // eslint-disable-line no-empty
       state = getState()
       currentPlayer = getCurrentPlayer()
       expect(state).toEqual('playing')

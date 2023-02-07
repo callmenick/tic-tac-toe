@@ -2,7 +2,7 @@
  * Tic Tac Toe
  *
  * A game played on a 3x3 grid, where players take turns playing x and o. One
- * player is assigned "x", and another assigned "o". Player "x" always playes
+ * player is assigned "x", and another assigned "o". Player "x" always plays
  * first. The game resolves when a player gets 3 in a row either horizontally,
  * vertically, or diagonally.
  *
@@ -24,7 +24,7 @@
  * ----|----|----
  *  20 | 21 | 22
  *
- * We will use this to assign spots when a player playes, and to determine the
+ * We will use this to assign cells when a player plays, and to determine the
  * outcome of the game with each passing move.
  */
 
@@ -120,14 +120,14 @@ export function play(x, y) {
   // don't allow playing if not in a playing state
   if (state !== 'playing') return
 
-  // don't allow playing if the spot is filled
-  if (board[x][y] !== undefined) return
+  // don't allow playing if the cell is filled
+  if (board[x][y] !== undefined) throw new Error('cell already filled!')
 
   // reject out of bounds coordinates
-  if (x < 0 || x > 2) return
-  if (y < 0 || y > 2) return
+  if (x < 0 || x > 2) throw new Error('illegal play!')
+  if (y < 0 || y > 2) throw new Error('illegal play!')
 
-  // fill the spot with the current player
+  // fill the cell with the current player
   board[x][y] = currentPlayer
 
   // update state by getting outcome after the play
@@ -140,8 +140,21 @@ export function play(x, y) {
 }
 
 /**
- * Resets the game of tic tac toe by emptying the board, changing state back to
- * idle, and resetting current player to x
+ * Starts a replay by clearing the board, setting game state to playing, and
+ * setting current player to x
+ */
+export function replay() {
+  board = [
+    new Array(3).fill(undefined),
+    new Array(3).fill(undefined),
+    new Array(3).fill(undefined),
+  ]
+  state = 'playing'
+  currentPlayer = 'x'
+}
+
+/**
+ * Resets the entire game to default state
  */
 export function reset() {
   board = [
