@@ -105,12 +105,6 @@ button:disabled {
   transform: scale(1.1);
 }
 
-.board-inactive .board-cell {
-  transform: scale(0.3);
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 .info {
   margin-top: 20px;
   text-align: center;
