@@ -12,10 +12,10 @@ beforeEach(() => {
 })
 
 describe('tictactoe', () => {
-  describe('idle state', () => {
-    test('default state is idle', () => {
+  describe('playing state', () => {
+    test('default state is playing', () => {
       const state = getState()
-      expect(state).toEqual('idle')
+      expect(state).toEqual('playing')
     })
 
     test('board is empty', () => {
@@ -28,7 +28,7 @@ describe('tictactoe', () => {
     test('expect game to transition to playing on start, and current player to be x', () => {
       let state = getState()
       let currentPlayer = getCurrentPlayer()
-      expect(state).toEqual('idle')
+      expect(state).toEqual('playing')
       start()
       state = getState()
       expect(state).toEqual('playing')
@@ -38,7 +38,7 @@ describe('tictactoe', () => {
     test('expect players to take turns if game is in continuous play state', () => {
       let state = getState()
       let currentPlayer = getCurrentPlayer()
-      expect(state).toEqual('idle')
+      expect(state).toEqual('playing')
       expect(currentPlayer).toEqual('x')
 
       start()
@@ -272,7 +272,7 @@ describe('tictactoe', () => {
     test('expect state and board to reset on reset', () => {
       let state = getState()
       let board = getBoard()
-      expect(state).toEqual('idle')
+      expect(state).toEqual('playing')
       expect(board.flat().filter(Boolean).length).toEqual(0)
       start()
       state = getState()
@@ -292,7 +292,7 @@ describe('tictactoe', () => {
       reset()
       state = getState()
       board = getBoard()
-      expect(state).toEqual('idle')
+      expect(state).toEqual('playing')
       expect(board.flat().filter(Boolean).length).toEqual(0)
     })
   })

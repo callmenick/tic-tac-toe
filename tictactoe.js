@@ -39,12 +39,14 @@ let board = [
 
 /**
  * Game state. Can be one of:
- *   idle – game is idle, hasn't started yet
+ *
  *   playing - game is in a playing state
  *   win - someone won the game
  *   draw - game is a draw
+ *
+ * Defaults to playing.
  */
-let state = 'idle'
+let state = 'playing'
 
 /**
  * Keep track of the current player, either "x" or "o"
@@ -140,20 +142,6 @@ export function play(x, y) {
 }
 
 /**
- * Starts a replay by clearing the board, setting game state to playing, and
- * setting current player to x
- */
-export function replay() {
-  board = [
-    new Array(3).fill(undefined),
-    new Array(3).fill(undefined),
-    new Array(3).fill(undefined),
-  ]
-  state = 'playing'
-  currentPlayer = 'x'
-}
-
-/**
  * Resets the entire game to default state
  */
 export function reset() {
@@ -162,7 +150,7 @@ export function reset() {
     new Array(3).fill(undefined),
     new Array(3).fill(undefined),
   ]
-  state = 'idle'
+  state = 'playing'
   currentPlayer = 'x'
 }
 
