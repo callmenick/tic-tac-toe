@@ -1,96 +1,118 @@
-import TicTacToe, { FS } from './tictactoe.js'
+import {
+  start,
+  play,
+  replay,
+  reset,
+  getState,
+  getCurrentPlayer,
+} from './tictactoe.js'
 
 function main() {
-  // initialise a new game
-  const tictactoe = TicTacToe()
-
   // get various elements in the dom
-  const board = document.querySelector('.board')
-  const boardSpots = document.querySelectorAll('.board-spot')
-  const turn = document.querySelector('.turn')
-  const startButton = document.querySelector('.button-start')
-  const restartButton = document.querySelector('.button-restart')
-  const resetButton = document.querySelector('.button-reset')
+  const $board = document.querySelector('.board')
+  const $boardCells = document.querySelectorAll('.board-cell')
+  const $currentPlayer = document.querySelector('.current-player')
+  const $startButton = document.querySelector('.button-start')
+  const $replayButton = document.querySelector('.button-replay')
+  const $resetButton = document.querySelector('.button-reset')
 
   // handle cell clicks
-  function onSpotClick(element, index) {
-    tictactoe.play(
-      index,
-      (prevState, nextState) => {
-        // add .filled class to spot
-        element.classList.add('filled')
+  function onCellClick($element, index) {
+    let state = getState()
+    let currentPlayer = getCurrentPlayer()
 
-        // fill squares based on previous state
-        if (prevState === FS.player_x_turn) element.innerHTML = 'x'
-        if (prevState === FS.player_o_turn) element.innerHTML = 'o'
+    // don't bother with dom logic if the game is not in a playing state
+    if (state !== 'playing') return
 
-        // handle outcomes based on next state
-        if (nextState === FS.player_x_turn) turn.innerHTML = 'x'
-        if (nextState === FS.player_o_turn) turn.innerHTML = 'o'
-        if (nextState === FS.player_x_wins) alert('X Wins!')
-        if (nextState === FS.player_o_wins) alert('O Wins!')
-        if (nextState === FS.draw) alert('Draw!')
-      },
-      () => {
-        alert('Spot already filled!')
+    // get the row and col based on cell index
+    const row = Math.floor(index / 3)
+    const col = index % 3
+
+    try {
+      // make the play
+      play(row, col)
+
+      // update the cell with the current player
+      $element.innerHTML = currentPlayer
+      $element.classList.add('filled')
+
+      state = getState()
+
+      // decide what to do depending on the next state
+      switch (state) {
+        case 'win': {
+          alert(`player ${currentPlayer} wins!`)
+          break
+        }
+        case 'draw': {
+          alert(`draw!`)
+          break
+        }
+        case 'playing': {
+          currentPlayer = getCurrentPlayer()
+          $currentPlayer.innerHTML = currentPlayer
+          break
+        }
+        default:
+          break
       }
-    )
+    } catch (error) {
+      alert(error)
+    }
   }
 
   // handle game start
   function onStart() {
-    tictactoe.start()
-    turn.innerHTML = 'x'
-    board.classList.add('board-active')
-    board.classList.remove('board-inactive')
-    startButton.setAttribute('disabled', true)
-    restartButton.removeAttribute('disabled')
-    resetButton.removeAttribute('disabled')
+    start()
+    $currentPlayer.innerHTML = getCurrentPlayer()
+    $board.classList.add('board-active')
+    $board.classList.remove('board-inactive')
+    $startButton.setAttribute('disabled', true)
+    $replayButton.removeAttribute('disabled')
+    $resetButton.removeAttribute('disabled')
   }
 
-  // handle game restart
-  function onRestart() {
-    tictactoe.restart()
-    turn.innerHTML = 'x'
-    board.classList.add('board-active')
-    board.classList.remove('board-inactive')
-    boardSpots.forEach((spot) => (spot.innerHTML = ''))
-    startButton.setAttribute('disabled', true)
-    restartButton.removeAttribute('disabled')
-    resetButton.removeAttribute('disabled')
+  // handle game replay
+  function onReplay() {
+    replay()
+    $boardCells.forEach((cell) => (cell.innerHTML = ''))
+    $currentPlayer.innerHTML = getCurrentPlayer()
+    $startButton.removeAttribute('disabled')
+    $replayButton.setAttribute('disabled', true)
+    $resetButton.setAttribute('disabled', true)
   }
 
   // handle game reset
   function onReset() {
-    tictactoe.reset()
-    board.classList.add('board-inactive')
-    board.classList.remove('board-active')
-    boardSpots.forEach((spot) => (spot.innerHTML = ''))
-    turn.innerHTML = '-'
-    startButton.removeAttribute('disabled')
-    restartButton.setAttribute('disabled', true)
-    resetButton.setAttribute('disabled', true)
+    reset()
+    $board.classList.add('board-inactive')
+    $board.classList.remove('board-active')
+    $boardCells.forEach((cell) => (cell.innerHTML = ''))
+    $currentPlayer.innerHTML = '-'
+    $startButton.removeAttribute('disabled')
+    $replayButton.setAttribute('disabled', true)
+    $resetButton.setAttribute('disabled', true)
   }
 
-  // handle click event for board spots
-  boardSpots.forEach((element, index) => {
+  // handle click event for board cells
+  $boardCells.forEach((element, index) => {
     element.addEventListener('click', () => {
-      onSpotClick(element, index)
+      onCellClick(element, index)
     })
   })
 
   // handle click event for start button
-  startButton.addEventListener('click', () => {
+  $startButton.addEventListener('click', () => {
     onStart()
   })
 
-  // handle click event for restart button
-  restartButton.addEventListener('click', () => {
-    onRestart()
+  // handle click event for replay button
+  $replayButton.addEventListener('click', () => {
+    onReplay()
   })
 
   // handle click event for reset button
-  resetButton.addEventListener('click', () => {
+  $resetButton.addEventListener('click', () => {
     onReset()
   })
 }

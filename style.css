@@ -84,7 +84,7 @@ button:disabled {
   grid-gap: 12px;
 }
 
-.board-spot {
+.board-cell {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,15 +97,15 @@ button:disabled {
   user-select: none;
 }
 
-.board-spot:not(.filled) {
+.board-cell:not(.filled) {
   cursor: pointer;
 }
 
-.board-spot:not(.filled):hover {
+.board-cell:not(.filled):hover {
   transform: scale(1.1);
 }
 
-.board-inactive .board-spot {
+.board-inactive .board-cell {
   transform: scale(0.3);
   opacity: 0.5;
   pointer-events: none;
