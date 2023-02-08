@@ -108,13 +108,6 @@ function getOutcome() {
 }
 
 /**
- * Starts the game by transitioning to "playing" state
- */
-export function start() {
-  state = 'playing'
-}
-
-/**
  * Executes a play at coordinates x,y, where x is the row indeex, and y is the
  * column index
  */
